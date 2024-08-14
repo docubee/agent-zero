@@ -22,7 +22,7 @@ def initialize():
     # chat_llm = models.get_openai_gpt35(temperature=0)
     # chat_llm = models.get_openai_gpt4o(temperature=0)
     
-    # chat_llm = models.get_openai_chat(temperature=0)
+    chat_llm = models.get_openai_chat(temperature=0)
 
     # chat_llm = models.get_anthropic_opus(temperature=0)
     # chat_llm = models.get_anthropic_sonnet(temperature=0)
@@ -39,12 +39,12 @@ def initialize():
     # chat_llm = models.get_ollama(model_name="gemma2:latest")
     # chat_llm = models.get_ollama(model_name="qwen:14b")
     # chat_llm = models.get_google_chat()
-    chat_llm = models.get_gemini_chat()
+    # chat_llm = models.get_gemini_chat()
 
-    # vision_llm = models.get_openai_chat(temperature=0)
+    vision_llm = models.get_openai_chat(temperature=0)
     # vision_llm = models.get_openai_gpt4o(temperature=0)
     # vision_llm = models.get_google_chat(temperature=0)
-    vision_llm = models.get_gemini_chat(temperature=0)
+    # vision_llm = models.get_gemini_chat(temperature=0)
 
     # utility model used for helper functions (cheaper, faster)
     utility_llm = models.get_openai_chat(temperature=0)
