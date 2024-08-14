@@ -9,5 +9,5 @@ class Delegation(Tool):
         response = self.agent.send_vision_message(system="You are an expert in OCR and reading invoices", msg=message, image_path=image_path, output_label="Vision OCR tool")
         return Response(message=response, break_loop=False)
 
-    def execute_gemini(self, message="", image_path="", **kwargs):
+    # def execute_gemini(self, message="", image_path="", **kwargs):
         
