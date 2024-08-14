@@ -4,7 +4,7 @@ from typing import Any, Optional, Dict
 from python.helpers import extract_tools, rate_limiter, files, errors
 from python.helpers.print_style import PrintStyle
 from langchain.schema import AIMessage
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder, HumanMessagePromptTemplate
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.embeddings import Embeddings
@@ -12,6 +12,7 @@ from langchain_core.embeddings import Embeddings
 @dataclass
 class AgentConfig: 
     chat_model:BaseChatModel
+    vision_model:BaseChatModel
     utility_model: BaseChatModel
     embeddings_model:Embeddings
     memory_subdir: str = ""
@@ -91,25 +92,38 @@ class Agent:
                     inputs = {"messages": self.history}
                     chain = prompt | self.config.chat_model
 
+                    PrintStyle(bold=True, font_color="green", padding=True, background_color="white").print(f"{self.agent_name}:----------Sending prompt------------")
+                    printer.stream(self.history)
+                    PrintStyle(bold=True, font_color="green", padding=True, background_color="white").print(f"{self.agent_name}:----------Sent prompt------------")
+
                     formatted_inputs = prompt.format(messages=self.history)
-                    tokens = int(len(formatted_inputs)/4)     
+                    tokens = int(len(formatted_inputs)/2)     
                     self.rate_limiter.limit_call_and_input(tokens)
                     
                     # output that the agent is starting
                     PrintStyle(bold=True, font_color="green", padding=True, background_color="white").print(f"{self.agent_name}: Starting a message:")
-                                            
-                    for chunk in chain.stream(inputs):
-                        if self.handle_intervention(agent_response): break # wait for intervention and handle it, if paused
 
-                        if isinstance(chunk, str): content = chunk
-                        elif hasattr(chunk, "content"): content = str(chunk.content)
-                        else: content = str(chunk)
+                    chunk = chain.invoke(inputs)
+                    if isinstance(chunk, str): content = chunk
+                    elif hasattr(chunk, "content"): content = str(chunk.content)
+                    else: content = str(chunk)
+                    
+                    if content:
+                        printer.stream(content) # output the agent response stream     
+                        agent_response += content # concatenate stream into the response
+
+                    # for chunk in chain.stream(inputs):
+                        # if self.handle_intervention(agent_response): break # wait for intervention and handle it, if paused
+
+                        # if isinstance(chunk, str): content = chunk
+                        # elif hasattr(chunk, "content"): content = str(chunk.content)
+                        # else: content = str(chunk)
                         
-                        if content:
-                            printer.stream(content) # output the agent response stream                
-                            agent_response += content # concatenate stream into the response
+                        # if content:
+                        #     printer.stream(content) # output the agent response stream     
+                        #     agent_response += content # concatenate stream into the response
 
-                    self.rate_limiter.set_output_tokens(int(len(agent_response)/4))
+                    self.rate_limiter.set_output_tokens(int(len(agent_response)/2))
                     
                     if not self.handle_intervention(agent_response):
                         if self.last_message == agent_response: #if assistant_response is the same as last message in history, let him know
@@ -183,7 +197,40 @@ class Agent:
         self.rate_limiter.set_output_tokens(int(len(response)/4))
 
         return response
-            
+
+    def send_vision_message(self, system: str, msg: str, image_path:str, output_label:str):
+        prompt = ChatPromptTemplate.from_messages([
+            SystemMessage(content=system),
+            HumanMessagePromptTemplate.from_template([{'image_url': {'path': f"{image_path}"}}, {'text': f"{msg}"}])
+          ])
+
+        chain = prompt | self.config.vision_model
+        response = ""
+        printer = None
+
+        if output_label:
+            PrintStyle(bold=True, font_color="orange", padding=True, background_color="white").print(f"{self.agent_name}: {output_label}:")
+            printer = PrintStyle(italic=True, font_color="orange", padding=False)
+            printer.print(f"image_path: {image_path}, msg: {msg}")
+
+        formatted_inputs = prompt.format()
+        tokens = int(len(formatted_inputs)/4)     
+        self.rate_limiter.limit_call_and_input(tokens)
+    
+        for chunk in chain.stream({}):
+            if self.handle_intervention(): break # wait for intervention and handle it, if paused
+
+            if isinstance(chunk, str): content = chunk
+            elif hasattr(chunk, "content"): content = str(chunk.content)
+            else: content = str(chunk)
+
+            if printer: printer.stream(content)
+            response+=content
+
+        self.rate_limiter.set_output_tokens(int(len(response)/4))
+
+        return response
+
     def get_last_message(self):
         if self.history:
             return self.history[-1]

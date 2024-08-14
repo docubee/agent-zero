@@ -21,7 +21,9 @@ def initialize():
     # chat_llm = models.get_groq_llama8b(temperature=0.2)
     # chat_llm = models.get_openai_gpt35(temperature=0)
     # chat_llm = models.get_openai_gpt4o(temperature=0)
-    chat_llm = models.get_openai_chat(temperature=0)
+    
+    # chat_llm = models.get_openai_chat(temperature=0)
+
     # chat_llm = models.get_anthropic_opus(temperature=0)
     # chat_llm = models.get_anthropic_sonnet(temperature=0)
     # chat_llm = models.get_anthropic_sonnet_35(temperature=0)
@@ -29,13 +31,24 @@ def initialize():
     # chat_llm = models.get_ollama_dolphin()
     # chat_llm = models.get_ollama(model_name="gemma2:27b")
     # chat_llm = models.get_ollama(model_name="llama3:8b-text-fp16")
+    # chat_llm = models.get_ollama(model_name="llama3.1:8b-text-fp16")
+    # chat_llm = models.get_ollama(model_name="llama3.1:8b-text-q4_0")
+    # chat_llm = models.get_ollama(model_name="llama3.1:8b")
+    # chat_llm = models.get_ollama(model_name="llama3.1:8b-instruct-fp16")
+    # chat_llm = models.get_ollama(model_name="llama3.1:8b-instruct-q4_1")
     # chat_llm = models.get_ollama(model_name="gemma2:latest")
     # chat_llm = models.get_ollama(model_name="qwen:14b")
     # chat_llm = models.get_google_chat()
+    chat_llm = models.get_gemini_chat()
 
+    # vision_llm = models.get_openai_chat(temperature=0)
+    # vision_llm = models.get_openai_gpt4o(temperature=0)
+    # vision_llm = models.get_google_chat(temperature=0)
+    vision_llm = models.get_gemini_chat(temperature=0)
 
     # utility model used for helper functions (cheaper, faster)
     utility_llm = models.get_openai_chat(temperature=0)
+    # utility_llm = models.get_ollama(model_name="llama3.1:8b")
     
     # embedding model used for memory
     embedding_llm = models.get_embedding_openai()
@@ -44,6 +57,7 @@ def initialize():
     # agent configuration
     config = AgentConfig(
         chat_model = chat_llm,
+        vision_model = vision_llm,
         utility_model = utility_llm,
         embeddings_model = embedding_llm,
         # memory_subdir = "",

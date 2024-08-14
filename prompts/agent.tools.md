@@ -41,6 +41,28 @@ Give him detailed instructions as well as good overview to understand what to do
 }
 ~~~
 
+### ocr_extract_tool:
+This tool should be used to extract text data from image using OCR and vision.
+Provide "message" argument with a prompt style text to guide how and what need to be extracted from image and how it should be formatted for result.
+Provide "image_path" argument with path of image relative to working directory.
+This tool is very powerful for understanding images and content embedded in them and it can understand the images and reason over images.
+When formulating the "message" argument specify if extraced text need to be converted to a specific structure or format like markdown,json etc.
+**Example usage**:
+~~~json
+{
+    "thoughts": [
+        "I need to extract...",
+        "First i will convert image to...",
+        "Then I will identify schema...",
+    ],
+    "tool_name": "ocr_extract_tool",
+    "tool_args": {
+        "message": "How to...",
+        "image_path": "path of image to extract data from"
+    }
+}
+~~~
+
 ### knowledge_tool:
 Provide "question" argument and get both online and memory response.
 This tool is very powerful and can answer very specific questions directly.

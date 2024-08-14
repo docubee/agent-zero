@@ -5,7 +5,9 @@ from langchain_openai import ChatOpenAI, OpenAI, OpenAIEmbeddings
 from langchain_anthropic import ChatAnthropic
 from langchain_groq import ChatGroq
 from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_google_genai import ChatGoogleGenerativeAI, HarmBlockThreshold, HarmCategory
+from langchain_google_genai import ChatGoogleGenerativeAI, HarmBlockThreshold, HarmCategory, GoogleGenerativeAI
+from langchain_google_vertexai import ChatVertexAI
+from langchain_core.pydantic_v1 import SecretStr
 
 
 # Load environment variables
@@ -16,7 +18,7 @@ DEFAULT_TEMPERATURE = 0.0
 
 # Utility function to get API keys from environment variables
 def get_api_key(service):
-    return os.getenv(f"API_KEY_{service.upper()}")
+    return os.getenv(f"API_KEY_{service.upper()}") or ""
 
 # Factory functions for each model type
 def get_anthropic_haiku(api_key=None, temperature=DEFAULT_TEMPERATURE):
@@ -57,6 +59,10 @@ def get_openai_gpt4o(api_key=None, temperature=DEFAULT_TEMPERATURE):
     api_key = api_key or get_api_key("openai")
     return ChatOpenAI(model_name="gpt-4o", temperature=temperature, api_key=api_key) # type: ignore
 
+def get_openai_gpt4omini(api_key=None, temperature=DEFAULT_TEMPERATURE):
+    api_key = api_key or get_api_key("openai")
+    return ChatOpenAI(model_name="gpt-4o-mini", temperature=temperature, api_key=api_key) # type: ignore
+
 def get_groq_mixtral7b(api_key=None, temperature=DEFAULT_TEMPERATURE):
     api_key = api_key or get_api_key("groq")
     return ChatGroq(model_name="mixtral-8x7b-32768", temperature=temperature, api_key=api_key) # type: ignore
@@ -75,7 +81,7 @@ def get_groq_llama8b(api_key=None, temperature=DEFAULT_TEMPERATURE):
     return ChatGroq(model_name="Llama3-8b-8192", temperature=temperature, api_key=api_key) # type: ignore
 
 def get_ollama(model_name, temperature=DEFAULT_TEMPERATURE):
-    return Ollama(model=model_name,temperature=temperature)
+    return Ollama(model=model_name,temperature=temperature,verbose=True)
 
 def get_groq_gemma(api_key=None, temperature=DEFAULT_TEMPERATURE):
     api_key = api_key or get_api_key("groq")
@@ -87,10 +93,14 @@ def get_ollama_dolphin(temperature=DEFAULT_TEMPERATURE):
 def get_ollama_phi(temperature=DEFAULT_TEMPERATURE):
     return Ollama(model="phi3:3.8b-mini-instruct-4k-fp16",temperature=temperature)
 
-def get_google_chat(model_name="gemini-1.5-flash-latest", api_key=None, temperature=DEFAULT_TEMPERATURE):
+def get_google_chat(model_name="gemini-1.5-flash-latest", api_key="", temperature=DEFAULT_TEMPERATURE):
     api_key = api_key or get_api_key("google")
-    return ChatGoogleGenerativeAI(model=model_name, temperature=temperature, google_api_key=api_key, 
+    return GoogleGenerativeAI(model=model_name, temperature=temperature, google_api_key=SecretStr(api_key),
                                   safety_settings={HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE }) # type: ignore
+
+def get_gemini_chat(model_name="gemini-1.5-flash-001", api_key=None, temperature=DEFAULT_TEMPERATURE):
+    api_key = api_key or get_api_key("google")
+    return ChatVertexAI(model=model_name, temperature=temperature, google_api_key=api_key)
 
 def get_embedding_hf(model_name="sentence-transformers/all-MiniLM-L6-v2"):
     return HuggingFaceEmbeddings(model_name=model_name)
