@@ -92,9 +92,9 @@ class Agent:
                     inputs = {"messages": self.history}
                     chain = prompt | self.config.chat_model
 
-                    PrintStyle(bold=True, font_color="green", padding=True, background_color="white").print(f"{self.agent_name}:----------Sending prompt------------")
-                    printer.stream(self.history)
-                    PrintStyle(bold=True, font_color="green", padding=True, background_color="white").print(f"{self.agent_name}:----------Sent prompt------------")
+                    # PrintStyle(bold=True, font_color="green", padding=True, background_color="white").print(f"{self.agent_name}:----------Sending prompt------------")
+                    # printer.stream(self.history)
+                    # PrintStyle(bold=True, font_color="green", padding=True, background_color="white").print(f"{self.agent_name}:----------Sent prompt------------")
 
                     formatted_inputs = prompt.format(messages=self.history)
                     tokens = int(len(formatted_inputs)/2)     
